@@ -1,5 +1,5 @@
 {
-  "name": "com.PinkPanter.GitLock",
+  "name": "com.pinkpanter.gitlock",
   "version": "1.0.0",
   "displayName": "Git Lock",
   "description": "The package allows lock scenes and prefabs via UI for banning another user to push that files",
