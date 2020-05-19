@@ -52,6 +52,9 @@ namespace GitLockPackage.Editor
 
         public static void OnInspectorGUI(Object target)
         {
+            if(!GitLockManager.IsEnabled)
+                return;
+
             var path = GetFilePath(target);
             if (path != null)
             {
@@ -136,6 +139,7 @@ namespace GitLockPackage.Editor
             }
             GUILayout.Label(text, GUILayout.MaxHeight(32));
         }
+
         private static void DrawUpdateGUI()
         {
             GUILayout.FlexibleSpace();

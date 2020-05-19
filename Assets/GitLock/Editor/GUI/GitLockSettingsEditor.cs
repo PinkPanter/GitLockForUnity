@@ -20,6 +20,14 @@ public class GitLockSettingsEditor : EditorWindow
     void OnGUI()
     {
         CheckStyles();
+        var basicColor = GUI.backgroundColor;
+
+        var oldEnable = GitLockManager.IsEnabled;
+        GUI.backgroundColor = oldEnable ? Color.green : Color.red;
+        if (GUILayout.Button(oldEnable ? "Enable" : "Disable"))
+            GitLockManager.IsEnabled = !oldEnable;
+
+        GUI.backgroundColor = basicColor;
 
         EditorGUILayout.BeginHorizontal(GUILayout.MaxHeight(16));
 
@@ -43,58 +51,63 @@ public class GitLockSettingsEditor : EditorWindow
         DrawUILine(Color.gray);
         EditorGUILayout.EndHorizontal();
 
-        EditorGUILayout.BeginHorizontal(GUILayout.MaxHeight(32));
-
-        EditorGUILayout.LabelField("Locked files", boldLabel, GUILayout.ExpandWidth(true));
-        EditorGUILayout.EndHorizontal();
-
-        var basicColor = GUI.backgroundColor;
-        scrollPoss = EditorGUILayout.BeginScrollView(scrollPoss);
-        var pathToRemove = Application.dataPath.Replace("/", "\\").Replace("\\Assets", string.Empty) + "\\";
         int index = 0;
-        foreach (var file in GitLockManager.LockedFiles)
+        if (GitLockManager.IsEnabled)
         {
-            var normalizedPath = file.path.Replace(pathToRemove, string.Empty);
-            tableElementStyle.normal.background = index % 2 == 0 ? Texture2D.grayTexture : Texture2D.whiteTexture;
-            EditorGUILayout.BeginHorizontal(tableElementStyle, GUILayout.MaxHeight(50));
+            EditorGUILayout.BeginHorizontal(GUILayout.MaxHeight(32));
 
-            GUILayout.Label(AssetDatabase.GetCachedIcon(normalizedPath),
-                GUILayout.MaxWidth(50), GUILayout.MaxHeight(50));
+            EditorGUILayout.LabelField("Locked files" + (GitLockManager.IsRenewingLocks ? "(Collecting locks...)" : string.Empty), boldLabel, GUILayout.ExpandWidth(true));
 
-            EditorGUILayout.BeginVertical(tableElementStyle, GUILayout.MaxHeight(50));
-
-            EditorGUILayout.BeginHorizontal(tableElementStyle, GUILayout.MaxHeight(50));
-            EditorGUILayout.LabelField("Path:", GUILayout.MaxWidth(32));
-            GUI.enabled = false;
-            EditorGUILayout.TextField(normalizedPath);
-            GUI.enabled = true;
             EditorGUILayout.EndHorizontal();
 
-            EditorGUILayout.BeginHorizontal(tableElementStyle, GUILayout.MaxHeight(50));
-            EditorGUILayout.LabelField("By", GUILayout.MaxWidth(32));
-            GUI.enabled = false;
-            EditorGUILayout.TextField(file.owner.name, GUILayout.MaxWidth(128));
-            GUI.enabled = true;
-            EditorGUILayout.LabelField("at " + file.locked_at);
-
-            bool isWorkingOnFile = GitLockManager.IsFileExecuting(file.path);
-            GUI.backgroundColor = isWorkingOnFile ? Color.yellow : Color.red;
-
-            if (GUILayout.Button(isWorkingOnFile ? "Unlocking..." : "Unlock forced", unlockButtonStyle, GUILayout.MaxWidth(128)))
+            scrollPoss = EditorGUILayout.BeginScrollView(scrollPoss);
+            var pathToRemove = Application.dataPath.Replace("/", "\\").Replace("\\Assets", string.Empty) + "\\";
+            foreach (var file in GitLockManager.LockedFiles)
             {
-                if (!isWorkingOnFile)
-                    GitLockManager.Unlock(file.path, true);
+                var normalizedPath = file.path.Replace(pathToRemove, string.Empty);
+                tableElementStyle.normal.background = index % 2 == 0 ? Texture2D.grayTexture : Texture2D.whiteTexture;
+                EditorGUILayout.BeginHorizontal(tableElementStyle, GUILayout.MaxHeight(50));
+
+                GUILayout.Label(AssetDatabase.GetCachedIcon(normalizedPath),
+                    GUILayout.MaxWidth(50), GUILayout.MaxHeight(50));
+
+                EditorGUILayout.BeginVertical(tableElementStyle, GUILayout.MaxHeight(50));
+
+                EditorGUILayout.BeginHorizontal(tableElementStyle, GUILayout.MaxHeight(50));
+                EditorGUILayout.LabelField("Path:", GUILayout.MaxWidth(32));
+                GUI.enabled = false;
+                EditorGUILayout.TextField(normalizedPath);
+                GUI.enabled = true;
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.BeginHorizontal(tableElementStyle, GUILayout.MaxHeight(50));
+                EditorGUILayout.LabelField("By", GUILayout.MaxWidth(32));
+                GUI.enabled = false;
+                EditorGUILayout.TextField(file.owner.name, GUILayout.MaxWidth(128));
+                GUI.enabled = true;
+                EditorGUILayout.LabelField("at " + file.locked_at);
+
+                bool isWorkingOnFile = GitLockManager.IsFileExecuting(file.path);
+                GUI.backgroundColor = isWorkingOnFile ? Color.yellow : Color.red;
+
+                if (GUILayout.Button(isWorkingOnFile ? "Unlocking..." : "Unlock forced", unlockButtonStyle, GUILayout.MaxWidth(128)))
+                {
+                    if (!isWorkingOnFile)
+                        GitLockManager.Unlock(file.path, true);
+                }
+
+                GUI.backgroundColor = basicColor;
+
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.EndVertical();
+
+                EditorGUILayout.EndHorizontal();
+                index++;
             }
-            GUI.backgroundColor = basicColor;
 
-            EditorGUILayout.EndHorizontal();
-            EditorGUILayout.EndVertical();
-
-            EditorGUILayout.EndHorizontal();
-            index++;
+            EditorGUILayout.EndScrollView();
         }
 
-        EditorGUILayout.EndScrollView();
 
         this.maxSize = new Vector2(800, 16 + 32 * 3 + index * 50);
     }
