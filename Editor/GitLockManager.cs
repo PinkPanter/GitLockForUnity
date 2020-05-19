@@ -22,6 +22,7 @@ namespace GitLockPackage.Editor
         private const string lastUpdateGitLocksTimeKey = "LastUpdateGitLocksTime";
         private const string lastLocksKey = "LastLocks";
         private const string gitUserNameKey = "GitUserName";
+        private const string isEnabledKey = "IsEnabled";
 
         #endregion
 
@@ -42,6 +43,15 @@ namespace GitLockPackage.Editor
                 EditorPrefs.SetString(gitUserNameKey, userName);
             }
         }
+        public static bool IsEnabled
+        {
+            get => isEnabled;
+            set
+            {
+                isEnabled = value;
+                EditorPrefs.SetBool(isEnabledKey, isEnabled);
+            }
+        }
 
         private static LockFile[] lockedFiles;
         private static int renewTime = 60;
@@ -53,6 +63,8 @@ namespace GitLockPackage.Editor
         private static string userName;
         private static bool isCollectingName;
 
+        private static bool isEnabled;
+
         private static bool saveName = false;
         private static string[] gitRepos;
         private static Dictionary<string, Task<string>> fileTasks = new Dictionary<string, Task<string>>();
@@ -61,6 +73,7 @@ namespace GitLockPackage.Editor
         {
             renewTime = EditorPrefs.GetInt(gitLockRenewTimeKey, 60);
             userName = EditorPrefs.GetString(gitUserNameKey, string.Empty);
+            isEnabled = EditorPrefs.GetBool(isEnabledKey, true);
 
             string lockedFileCache = EditorPrefs.GetString(lastLocksKey, string.Empty);
             if (!string.IsNullOrEmpty(lockedFileCache))
