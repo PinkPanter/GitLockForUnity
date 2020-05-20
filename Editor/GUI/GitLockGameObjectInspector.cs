@@ -46,7 +46,6 @@ namespace GitLockPackage.Editor
 
         public override void OnInspectorGUI()
         {
-
             GitLockGUI.OnInspectorGUI(target);
         }
     }
