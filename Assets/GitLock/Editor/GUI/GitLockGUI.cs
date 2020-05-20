@@ -73,7 +73,8 @@ namespace GitLockPackage.Editor
             }
 
             tempPath = AssetDatabase.GetAssetPath(target);
-            if (tempPath.EndsWith(".unity"))
+            if (tempPath.EndsWith(".unity") ||
+                (tempPath.EndsWith(".asset") && target is ScriptableObject))
             {
                 pathToReturn = tempPath;
             }
